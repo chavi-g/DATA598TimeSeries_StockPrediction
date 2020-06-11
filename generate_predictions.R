@@ -102,7 +102,7 @@ get_predictions = function(stock_id, test_size = 14) {
     pred_colnames[j] = paste0("ysim_", j)
   }
 
-  df = cbind(stock_column, date, preds)
+  df = cbind(stock_column, dates_column, preds)
   colnames(df) = c("stock_id", "Date", pred_colnames)
   return(df)
 }
@@ -114,12 +114,19 @@ for (i in 1:19) {
   final_predictions = rbind(final_predictions, get_predictions(i))
   print(dim(final_predictions))
 }
-#dev.off()
 
-#min.col <- function(m, ...) max.col(-m, ...)
-#res2['BestModel'] = colnames(results[c("Mixture", "Arima", "Tbats", "Stlm", "Fourier", "ETS")])[min.col(results[c("Mixture", "Arima", "Tbats", "Stlm")],ties.method="first")]
-#print(res2)
-#write.csv(res2, 'crps_values3.csv', row.names = FALSE)
+idcols = c()
+for (k in 1:nrow(final_predictions)){
+  idcols[k] = final_predictions$stock_id[[k]]
+}
+final_predictions['stock_id'] = idcols
 
+for (k in pred_colnames) {
+  colvals = c()
+  for (j in 1:nrow(final_predictions)){
+    colvals[j] = final_predictions[, k][[j]]
+  }
+  final_predictions[,k] = colvals
+}
 
-
+write.csv(final_predictions, 'forecasts_stocks_2.csv', row.names = FALSE, quote = FALSE)
